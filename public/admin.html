@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin - IPL Auction</title>
+  <link rel="stylesheet" href="/css/style.css"/>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="/">IPL <span>AUCTION</span></a>
+  <div class="nav-links">
+    <a href="/">Players</a>
+    <a href="/admin" class="active">Admin</a>
+    <button class="btn btn-outline btn-sm" onclick="logout()" id="logoutBtn" style="display:none">Logout</button>
+  </div>
+</nav>
+
+<!-- LOGIN PANEL -->
+<div id="loginPanel" class="section" style="max-width:400px; margin-top:4rem;">
+  <h2 class="section-title">ADMIN LOGIN</h2>
+  <div class="form-group">
+    <label>Username</label>
+    <input type="text" id="loginUsername" placeholder="admin" value="admin"/>
+  </div>
+  <div class="form-group">
+    <label>Password</label>
+    <input type="password" id="loginPassword" placeholder="••••••••"/>
+  </div>
+  <button class="btn btn-gold" onclick="doLogin()">Login →</button>
+</div>
+
+<!-- ADMIN DASHBOARD -->
+<div id="adminPanel" style="display:none;">
+  <div class="section">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:2rem;">
+      <h2 class="section-title" style="margin-bottom:0">MANAGE PLAYERS</h2>
+      <button class="btn btn-gold" onclick="openAddModal()">+ Add Player</button>
+    </div>
+
+    <div class="table-wrap">
+      <table id="adminTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Player</th>
+            <th>Role</th>
+            <th>Base Price</th>
+            <th>Current Bid</th>
+            <th>Bidder / Team</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="adminTableBody">
+          <tr><td colspan="8" style="text-align:center; color:var(--muted);">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT PLAYER MODAL -->
+<div class="modal-overlay" id="playerModal">
+  <div class="modal" style="max-width:600px; max-height:90vh; overflow-y:auto;">
+    <h2 id="playerModalTitle">ADD PLAYER</h2>
+    <input type="hidden" id="editPlayerId"/>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" id="pName" placeholder="Virat Kohli"/>
+      </div>
+      <div class="form-group">
+        <label>Role</label>
+        <select id="pRole">
+          <option value="Batsman">Batsman</option>
+          <option value="Bowler">Bowler</option>
+          <option value="All-Rounder">All-Rounder</option>
+          <option value="Wicket-Keeper">Wicket-Keeper</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Nationality</label>
+        <input type="text" id="pNationality" placeholder="Indian"/>
+      </div>
+      <div class="form-group">
+        <label>Age</label>
+        <input type="number" id="pAge" placeholder="30"/>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Base Price (₹)</label>
+      <input type="number" id="pBasePrice" placeholder="5000000"/>
+    </div>
+
+    <div class="form-group">
+      <label>Image URL</label>
+      <input type="text" id="pImageUrl" placeholder="https://..."/>
+    </div>
+
+    <div class="form-group">
+      <label>Stats (JSON) — e.g. for batsman:</label>
+      <textarea id="pStats" rows="3" placeholder='{"matches": 200, "runs": 5000, "average": 45.0, "strike_rate": 135.0}'></textarea>
+    </div>
+
+    <div id="editStatusGroup" class="form-group" style="display:none;">
+      <label>Status</label>
+      <select id="pStatus">
+        <option value="available">Available</option>
+        <option value="sold">Sold</option>
+      </select>
+    </div>
+
+    <div style="display:flex; gap:1rem; margin-top:1rem;">
+      <button class="btn btn-gold" onclick="savePlayer()">Save Player</button>
+      <button class="btn btn-outline" onclick="closePlayerModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="/js/admin.js"></script>
+</body>
+</html>
