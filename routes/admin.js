@@ -144,4 +144,16 @@ router.post('/players/bulk', requireAdmin, async (req, res) => {
   res.json(results);
 });
 
+// Clear all Wikipedia image URLs so they get re-fetched
+router.post('/clear-wiki-images', requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `UPDATE players SET image_url = NULL WHERE image_url LIKE '%wikimedia%' OR image_url LIKE '%wikipedia%'`
+    );
+    res.json({ success: true, cleared: result.rowCount });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = { router, requireAdmin };
