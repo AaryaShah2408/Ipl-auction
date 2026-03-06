@@ -106,4 +106,42 @@ router.post('/players/:id/sell', requireAdmin, async (req, res) => {
   }
 });
 
+// BULK IMPORT players from CSV data
+router.post('/players/bulk', requireAdmin, async (req, res) => {
+  const { players } = req.body;
+  if (!players || !Array.isArray(players) || players.length === 0) {
+    return res.status(400).json({ error: 'No players provided' });
+  }
+
+  const results = { success: 0, failed: 0, errors: [] };
+
+  for (const p of players) {
+    try {
+      if (!p.name || !p.role || !p.nationality || !p.base_price) {
+        results.failed++;
+        results.errors.push(`Skipped row: missing required fields (name/role/nationality/base_price) — "${p.name || 'unknown'}"`);
+        continue;
+      }
+
+      let stats = null;
+      if (p.stats) {
+        try { stats = typeof p.stats === 'string' ? JSON.parse(p.stats) : p.stats; }
+        catch { stats = null; }
+      }
+
+      await pool.query(
+        `INSERT INTO players (name, role, nationality, age, base_price, current_bid, stats, image_url)
+         VALUES ($1, $2, $3, $4, $5, $5, $6, $7)`,
+        [p.name.trim(), p.role.trim(), p.nationality.trim(), parseInt(p.age) || null, parseInt(p.base_price), stats, p.image_url || null]
+      );
+      results.success++;
+    } catch (err) {
+      results.failed++;
+      results.errors.push(`"${p.name}": ${err.message}`);
+    }
+  }
+
+  res.json(results);
+});
+
 module.exports = { router, requireAdmin };

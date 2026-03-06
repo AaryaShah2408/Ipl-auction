@@ -34,30 +34,91 @@
 <!-- ADMIN DASHBOARD -->
 <div id="adminPanel" style="display:none;">
   <div class="section">
-    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:2rem;">
-      <h2 class="section-title" style="margin-bottom:0">MANAGE PLAYERS</h2>
-      <button class="btn btn-gold" onclick="openAddModal()">+ Add Player</button>
+
+    <!-- TABS -->
+    <div style="display:flex; gap:1rem; margin-bottom:2rem; border-bottom:1px solid var(--border); padding-bottom:1rem;">
+      <button class="btn btn-gold" onclick="showTab('players')">Manage Players</button>
+      <button class="btn btn-outline" onclick="showTab('bulk')">Bulk Import CSV</button>
     </div>
 
-    <div class="table-wrap">
-      <table id="adminTable">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Player</th>
-            <th>Role</th>
-            <th>Base Price</th>
-            <th>Current Bid</th>
-            <th>Bidder / Team</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="adminTableBody">
-          <tr><td colspan="8" style="text-align:center; color:var(--muted);">Loading...</td></tr>
-        </tbody>
-      </table>
+    <!-- PLAYERS TAB -->
+    <div id="tabPlayers">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:2rem;">
+        <h2 class="section-title" style="margin-bottom:0">MANAGE PLAYERS</h2>
+        <button class="btn btn-gold" onclick="openAddModal()">+ Add Player</button>
+      </div>
+      <div class="table-wrap">
+        <table id="adminTable">
+          <thead>
+            <tr>
+              <th>#</th><th>Player</th><th>Role</th><th>Base Price</th>
+              <th>Current Bid</th><th>Bidder / Team</th><th>Status</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="adminTableBody">
+            <tr><td colspan="8" style="text-align:center; color:var(--muted);">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
+
+    <!-- BULK IMPORT TAB -->
+    <div id="tabBulk" style="display:none;">
+      <h2 class="section-title">BULK IMPORT VIA CSV</h2>
+
+      <!-- Instructions -->
+      <div style="background:var(--navy); border:1px solid var(--border); border-radius:12px; padding:1.5rem; margin-bottom:2rem;">
+        <h3 style="font-family:'Teko',sans-serif; font-size:1.3rem; color:var(--teal); margin-bottom:1rem;">📋 How to use</h3>
+        <p style="color:var(--muted); margin-bottom:1rem;">Your CSV file must have these column headers in the first row:</p>
+        <div style="background:var(--card); border-radius:8px; padding:1rem; font-family:monospace; font-size:0.85rem; color:var(--gold); overflow-x:auto; margin-bottom:1rem;">
+          name,role,nationality,age,base_price,image_url,stats
+        </div>
+        <p style="color:var(--muted); margin-bottom:0.5rem;"><strong style="color:var(--text);">Required:</strong> name, role, nationality, base_price</p>
+        <p style="color:var(--muted); margin-bottom:0.5rem;"><strong style="color:var(--text);">Optional:</strong> age, image_url, stats</p>
+        <p style="color:var(--muted); margin-bottom:1rem;"><strong style="color:var(--text);">Role values:</strong> Batsman, Bowler, All-Rounder, Wicket-Keeper</p>
+        <p style="color:var(--muted); margin-bottom:0.5rem;"><strong style="color:var(--text);">base_price:</strong> in ₹ numbers only e.g. 5000000</p>
+        <p style="color:var(--muted);"><strong style="color:var(--text);">image_url:</strong> direct link to player photo (e.g. from Wikipedia or Imgur)</p>
+      </div>
+
+      <!-- Sample CSV Download -->
+      <div style="margin-bottom:2rem;">
+        <p style="color:var(--muted); margin-bottom:0.75rem;">Download a sample CSV to get started:</p>
+        <button class="btn btn-outline" onclick="downloadSampleCSV()">⬇ Download Sample CSV</button>
+      </div>
+
+      <!-- File Upload -->
+      <div style="background:var(--card); border:2px dashed var(--border); border-radius:12px; padding:2rem; text-align:center; margin-bottom:1.5rem;" id="dropZone">
+        <div style="font-size:2.5rem; margin-bottom:1rem;">📂</div>
+        <p style="color:var(--text); font-size:1.1rem; margin-bottom:0.5rem;">Drop your CSV file here</p>
+        <p style="color:var(--muted); margin-bottom:1.5rem;">or</p>
+        <input type="file" id="csvFile" accept=".csv" style="display:none" onchange="handleFile(this)"/>
+        <button class="btn btn-gold" onclick="document.getElementById('csvFile').click()">Choose CSV File</button>
+      </div>
+
+      <!-- Preview -->
+      <div id="csvPreview" style="display:none;">
+        <h3 style="font-family:'Teko',sans-serif; font-size:1.3rem; color:var(--gold); margin-bottom:1rem;">PREVIEW</h3>
+        <p style="color:var(--muted); margin-bottom:1rem;" id="csvCount"></p>
+        <div class="table-wrap" style="margin-bottom:1.5rem;">
+          <table id="previewTable">
+            <thead>
+              <tr>
+                <th>Name</th><th>Role</th><th>Nationality</th><th>Age</th><th>Base Price</th><th>Image URL</th>
+              </tr>
+            </thead>
+            <tbody id="previewBody"></tbody>
+          </table>
+        </div>
+        <div style="display:flex; gap:1rem;">
+          <button class="btn btn-gold" onclick="importPlayers()">✅ Import All Players</button>
+          <button class="btn btn-outline" onclick="clearCSV()">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div id="importResults" style="display:none; margin-top:1.5rem;"></div>
+    </div>
+
   </div>
 </div>
 
@@ -66,7 +127,6 @@
   <div class="modal" style="max-width:600px; max-height:90vh; overflow-y:auto;">
     <h2 id="playerModalTitle">ADD PLAYER</h2>
     <input type="hidden" id="editPlayerId"/>
-
     <div class="form-row">
       <div class="form-group">
         <label>Name</label>
@@ -82,7 +142,6 @@
         </select>
       </div>
     </div>
-
     <div class="form-row">
       <div class="form-group">
         <label>Nationality</label>
@@ -93,22 +152,18 @@
         <input type="number" id="pAge" placeholder="30"/>
       </div>
     </div>
-
     <div class="form-group">
       <label>Base Price (₹)</label>
       <input type="number" id="pBasePrice" placeholder="5000000"/>
     </div>
-
     <div class="form-group">
       <label>Image URL</label>
       <input type="text" id="pImageUrl" placeholder="https://..."/>
     </div>
-
     <div class="form-group">
-      <label>Stats (JSON) — e.g. for batsman:</label>
+      <label>Stats (JSON)</label>
       <textarea id="pStats" rows="3" placeholder='{"matches": 200, "runs": 5000, "average": 45.0, "strike_rate": 135.0}'></textarea>
     </div>
-
     <div id="editStatusGroup" class="form-group" style="display:none;">
       <label>Status</label>
       <select id="pStatus">
@@ -116,7 +171,6 @@
         <option value="sold">Sold</option>
       </select>
     </div>
-
     <div style="display:flex; gap:1rem; margin-top:1rem;">
       <button class="btn btn-gold" onclick="savePlayer()">Save Player</button>
       <button class="btn btn-outline" onclick="closePlayerModal()">Cancel</button>
